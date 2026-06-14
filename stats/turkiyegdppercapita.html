@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Turkey Provincial GDP Explorer</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 font-sans p-4 md:p-8">
+
+    <div class="max-w-6xl mx-auto">
+        
+        <!-- Top Navigation / Header Panel Container -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-gray-200 pb-6 mb-8 gap-4">
+            <div class="text-left">
+                <h1 id="pageTitle" data-i18n="title" class="text-3xl font-bold text-gray-900 tracking-tight">Turkey GDP per Capita by Province</h1>
+                <p id="pageSubtitle" data-i18n="subtitle" class="text-gray-600 mt-2">Interactive economic tracking across all 81 provinces relative to the national baseline.</p>
+            </div>
+            
+            <!-- Custom Language Dropdown Selector -->
+            <div class="relative inline-block text-left self-end md:self-center">
+                <button id="translateBtn" class="inline-flex justify-center items-center gap-x-2 rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 shadow-sm border border-gray-200 hover:bg-gray-50 focus:outline-none transition-colors">
+                    <span>🌐</span>
+                    <span id="currentLangLabel">Translate: English</span>
+                    <svg class="h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+                    </svg>
+                </button>
+                <div id="translateDropdown" class="hidden absolute right-0 z-50 mt-2 w-48 origin-top-right rounded-xl bg-white shadow-xl border border-gray-100 overflow-hidden ring-1 ring-black ring-opacity-5">
+                    <div class="py-1">
+                        <button onclick="changeLanguage('en')" class="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors font-medium">English</button>
+                        <button onclick="changeLanguage('tr')" class="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors font-medium">Türkçe (Turkish)</button>
+                        <button onclick="changeLanguage('fr')" class="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors font-medium">Français (French)</button>
+                        <button onclick="changeLanguage('es')" class="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors font-medium">Español (Spanish)</button>
+                        <button onclick="changeLanguage('de')" class="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors font-medium">Deutsch (German)</button>
+                        <button onclick="changeLanguage('it')" class="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors font-medium">Italiano (Italian)</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- KPI Metrics Dashboard -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col justify-between">
+                <span data-i18n="kpi_avg" class="text-sm font-medium text-gray-500 uppercase tracking-wider">National Average Baseline</span>
+                <span class="text-3xl font-bold text-blue-600 mt-2">$19,020 <span class="text-sm font-normal text-gray-400">USD</span></span>
+            </div>
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col justify-between">
+                <span data-i18n="kpi_highest" class="text-sm font-medium text-gray-500 uppercase tracking-wider">Highest Performing</span>
+                <span class="text-3xl font-bold text-emerald-600 mt-2">$24,452 <span id="kpiHighCity" class="text-sm font-normal text-gray-500">İstanbul</span></span>
+            </div>
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col justify-between">
+                <span data-i18n="kpi_lowest" class="text-sm font-medium text-gray-500 uppercase tracking-wider">Lowest Performing</span>
+                <span class="text-3xl font-bold text-rose-600 mt-2">$5,731 <span id="kpiLowCity" class="text-sm font-normal text-gray-500">Şanlıurfa</span></span>
+            </div>
+        </div>
+
+        <!-- Controls (Search & Filters) -->
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+                <label data-i18n="lbl_search" class="block text-xs font-semibold uppercase text-gray-500 mb-1">Search Province</label>
+                <input type="text" id="searchBar" class="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div>
+                <label data-i18n="lbl_region" class="block text-xs font-semibold uppercase text-gray-500 mb-1">Filter by Region</label>
+                <select id="regionFilter" class="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="All" data-i18n="opt_all_regions">All Regions</option>
+                    <option value="Marmara" data-i18n="reg_Marmara">Marmara</option>
+                    <option value="Aegean" data-i18n="reg_Aegean">Aegean</option>
+                    <option value="Central Anatolia" data-i18n="reg_CentralAnatolia">Central Anatolia</option>
+                    <option value="Mediterranean" data-i18n="reg_Mediterranean">Mediterranean</option>
+                    <option value="Black Sea" data-i18n="reg_BlackSea">Black Sea</option>
+                    <option value="Eastern Anatolia" data-i18n="reg_EasternAnatolia">Eastern Anatolia</option>
+                    <option value="Southeastern Anatolia" data-i18n="reg_SoutheasternAnatolia">Southeastern Anatolia</option>
+                </select>
+            </div>
+            <div>
+                <label data-i18n="lbl_sort" class="block text-xs font-semibold uppercase text-gray-500 mb-1">Sort Order</label>
+                <select id="sortOrder" class="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="desc" data-i18n="opt_sort_desc">Highest to Lowest GDP</option>
+                    <option value="asc" data-i18n="opt_sort_asc">Lowest to Highest GDP</option>
+                    <option value="alpha" data-i18n="opt_sort_alpha">Alphabetical (A-Z)</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Data Grid Display -->
+        <div id="provinceGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+        
+        <!-- Empty State -->
+        <div id="emptyState" data-i18n="empty_state" class="hidden text-center py-12 text-gray-500 bg-white rounded-xl border border-dashed border-gray-200">
+            No provinces found matching your filter criteria.
+        </div>
+    </div>
+
+    <!-- Data Engine & Translation Logic -->
+    <script>
+        const NATIONAL_AVG = 19020;
+        let currentLang = 'en';
+
+        // Translation Dictionary Asset
+        const i18n = {
+            en: {
+                label: "Translate: English",
+                title: "Turkey GDP per Capita by Province",
+                subtitle: "Interactive economic tracking across all 81 provinces relative to the national baseline.",
+                kpi_avg: "National Average Baseline",
+                kpi_highest: "Highest Performing",
+                kpi_lowest: "Lowest Performing",
+                lbl_search: "Search Province",
+                placeholder_search: "e.g., Ankara, Izmir...",
+                lbl_region: "Filter by Region",
+                lbl_sort: "Sort Order",
+                opt_all_regions: "All Regions",
+                opt_sort_desc: "Highest to Lowest GDP",
+                opt_sort_asc: "Lowest to Highest GDP",
+                opt_sort_alpha: "Alphabetical (A-Z)",
+                lbl_of_avg: "of Avg",
+                empty_state: "No provinces found matching your filter criteria.",
+                reg_Marmara: "Marmara",
+                reg_Aegean: "Aegean",
+                reg_CentralAnatolia: "Central Anatolia",
+                reg_Mediterranean: "Mediterranean",
+                reg_BlackSea: "Black Sea",
+                reg_EasternAnatolia: "Eastern Anatolia",
+                reg_SoutheasternAnatolia: "Southeastern Anatolia"
+            },
+            tr: {
+                label: "Dil: Türkçe",
+                title: "İllere Göre Türkiye Kişi Başına GSYH",
+                subtitle: "81 ilin tamamında ulusal temel çizgiye göre etkileşimli ekonomik takip.",
+                kpi_avg: "Ulusal Ortalama Temel Çizgisi",
+                kpi_highest: "En Yüksek Performans",
+                kpi_lowest: "En Düşük Performans",
+                lbl_search: "İl Ara",
+                placeholder_search: "Örn: Ankara, İzmir...",
+                lbl_region: "Bölgeye Göre Filtrele",
+                lbl_sort: "Sıralama Ölçütü",
+                opt_all_regions: "Tüm Bölgeler",
+                opt_sort_desc: "En Yüksekten En Düşüğe GSYH",
+                opt_sort_asc: "En Düşükten En Yükseğe GSYH",
+                opt_sort_alpha: "Alfabetik (A-Z)",
+                lbl_of_avg: "Ortalamanın %'si",
+                empty_state: "Filtre kriterlerinize uygun il bulunamadı.",
+                reg_Marmara: "Marmara",
+                reg_Aegean: "Ege",
+                reg_CentralAnatolia: "İç Anadolu",
+                reg_Mediterranean: "Akdeniz",
+                reg_BlackSea: "Karadeniz",
+                reg_EasternAnatolia: "Doğu Anadolu",
+                reg_SoutheasternAnatolia: "Güneydoğu Anadolu"
+            },
+            fr: {
+                label: "Traduire: Français",
+                title: "PIB par habitant de la Turquie par province",
+                subtitle: "Suivi économique interactif dans les 81 provinces par rapport à la moyenne nationale.",
+                kpi_avg: "Moyenne Nationale de Référence",
+                kpi_highest: "Performance la plus élevée",
+                kpi_lowest: "Performance la plus faible",
+                lbl_search: "Rechercher une province",
+                placeholder_search: "ex: Ankara, Izmir...",
+                lbl_region: "Filtrer par Région",
+                lbl_sort: "Ordre de tri",
+                opt_all_regions: "Toutes les régions",
+                opt_sort_desc: "PIB du plus élevé au plus bas",
+                opt_sort_asc: "PIB du plus bas au plus élevé",
+                opt_sort_alpha: "Alphabétique (A-Z)",
+                lbl_of_avg: "de la moyenne",
+                empty_state: "Aucune province ne correspond à vos critères de recherche.",
+                reg_Marmara: "Marmara",
+                reg_Aegean: "Égée",
+                reg_CentralAnatolia: "Anatolie centrale",
+                reg_Mediterranean: "Méditerranée",
+                reg_BlackSea: "Mer Noire",
+                reg_EasternAnatolia: "Anatolie orientale",
+                reg_SoutheasternAnatolia: "Anatolie du Sud-Est"
+            },
+            es: {
+                label: "Traducir: Español",
+                title: "PIB per cápita de Turquía por provincia",
+                subtitle: "Seguimiento económico interactivo en las 81 provincias en relación con la base nacional.",
+                kpi_avg: "Línea Base del Promedio Nacional",
+                kpi_highest: "Mayor Rendimiento",
+                kpi_lowest: "Menor Rendimiento",
+                lbl_search: "Buscar Provincia",
+                placeholder_search: "ej: Ankara, Izmir...",
+                lbl_region: "Filtrar por Región",
+                lbl_sort: "Orden de Clasificación",
+                opt_all_regions: "Todas las Regiones",
+                opt_sort_desc: "PIB de Mayor a Menor",
+                opt_sort_asc: "PIB de Menor a Mayor",
+                opt_sort_alpha: "Alfabético (A-Z)",
+                lbl_of_avg: "del Promedio",
+                empty_state: "No se encontraron provincias que coincidan con sus criterios.",
+                reg_Marmara: "Mármara",
+                reg_Aegean: "Egeo",
+                reg_CentralAnatolia: "Anatolia Central",
+                reg_Mediterranean: "Mediterráneo",
+                reg_BlackSea: "Mar Negro",
+                reg_EasternAnatolia: "Anatolia Oriental",
+                reg_SoutheasternAnatolia: "Anatolia del Sudeste"
+            },
+            de: {
+                label: "Übersetzen: Deutsch",
+                title: "BIP pro Kopf in der Türkei nach Provinzen",
+                subtitle: "Interaktive Wirtschaftsverfolgung in allen 81 Provinzen im Vergleich zum nationalen Basiswert.",
+                kpi_avg: "Nationaler Durchschnittswert",
+                kpi_highest: "Höchste Leistung",
+                kpi_lowest: "Niedrigste Leistung",
+                lbl_search: "Provinz Suchen",
+                placeholder_search: "z.B. Ankara, Izmir...",
+                lbl_region: "Nach Region Filtern",
+                lbl_sort: "Sortierreihenfolge",
+                opt_all_regions: "Alle Regionen",
+                opt_sort_desc: "BIP Höchstes bis Niedrigstes",
+                opt_sort_asc: "BIP Niedrigstes bis Höchstes",
+                opt_sort_alpha: "Alphabetisch (A-Z)",
+                lbl_of_avg: "vom Durchschn.",
+                empty_state: "Keine Provinzen gefunden, die Ihren Kriterien entsprechen.",
+                reg_Marmara: "Marmara",
+                reg_Aegean: "Ägäis",
+                reg_CentralAnatolia: "Zentralanatolien",
+                reg_Mediterranean: "Mittelmeerregion",
+                reg_BlackSea: "Schwarzmeerregion",
+                reg_EasternAnatolia: "Ostanatolien",
+                reg_SoutheasternAnatolia: "Südostanatolien"
+            },
+            it: {
+                label: "Traduci: Italiano",
+                title: "PIL pro capite della Turchia per provincia",
+                subtitle: "Monitoraggio economico interattivo in tutte le 81 province rispetto alla linea di base nazionale.",
+                kpi_avg: "Media Nazionale di Riferimento",
+                kpi_highest: "Rendimento Più Alto",
+                kpi_lowest: "Rendimento Più Basso",
+                lbl_search: "Cerca Provincia",
+                placeholder_search: "es. Ankara, Izmir...",
+                lbl_region: "Filtra per Regione",
+                lbl_sort: "Ordinamento",
+                opt_all_regions: "Tutte le Regioni",
+                opt_sort_desc: "PIL dal più alto al più basso",
+                opt_sort_asc: "PIL dal più basso al più alto",
+                opt_sort_alpha: "Alfabetico (A-Z)",
+                lbl_of_avg: "della Media",
+                empty_state: "Nessuna provincia trovata con i criteri selezionati.",
+                reg_Marmara: "Marmara",
+                reg_Aegean: "Egeo",
+                reg_CentralAnatolia: "Anatolia Centrale",
+                reg_Mediterranean: "Mediterraneo",
+                reg_BlackSea: "Mar Nero",
+                reg_EasternAnatolia: "Anatolia Orientale",
+                reg_SoutheasternAnatolia: "Anatolia Sud-Orientale"
+            }
+        };
+
+        const provincesData = [
+            { name: "İstanbul", region: "Marmara", gdp: 24452 },
+            { name: "Kocaeli", region: "Marmara", gdp: 24031 },
+            { name: "Ankara", region: "CentralAnatolia", gdp: 24031 },
+            { name: "Tekirdağ", region: "Marmara", gdp: 18406 },
+            { name: "Antalya", region: "Mediterranean", gdp: 17103 },
+            { name: "İzmir", region: "Aegean", gdp: 16949 },
+            { name: "Bolu", region: "BlackSea", gdp: 16703 },
+            { name: "Kırklareli", region: "Marmara", gdp: 16188 },
+            { name: "Eskişehir", region: "CentralAnatolia", gdp: 16171 },
+            { name: "Bilecik", region: "Marmara", gdp: 16068 },
+            { name: "Muğla", region: "Aegean", gdp: 16040 },
+            { name: "Yalova", region: "Marmara", gdp: 15269 },
+            { name: "Bursa", region: "Marmara", gdp: 15014 },
+            { name: "Çanakkale", region: "Marmara", gdp: 14704 },
+            { name: "Sakarya", region: "Marmara", gdp: 14605 },
+            { name: "Tunceli", region: "EasternAnatolia", gdp: 14582 },
+            { name: "Karaman", region: "CentralAnatolia", gdp: 14374 },
+            { name: "Balıkesir", region: "Marmara", gdp: 14004 },
+            { name: "Manisa", region: "Aegean", gdp: 13852 },
+            { name: "Düzce", region: "BlackSea", gdp: 13721 },
+            { name: "Mersin", region: "Mediterranean", gdp: 13549 },
+            { name: "Kırıkkale", region: "CentralAnatolia", gdp: 13284 },
+            { name: "Çankırı", region: "CentralAnatolia", gdp: 13111 },
+            { name: "Edirne", region: "Marmara", gdp: 12711 },
+            { name: "Denizli", region: "Aegean", gdp: 12522 },
+            { name: "Kütahya", region: "Aegean", gdp: 12384 },
+            { name: "Aksaray", region: "CentralAnatolia", gdp: 12319 },
+            { name: "Kayseri", region: "CentralAnatolia", gdp: 12296 },
+            { name: "Uşak", region: "Aegean", gdp: 12114 },
+            { name: "Kastamonu", region: "BlackSea", gdp: 12035 },
+            { name: "Erzincan", region: "EasternAnatolia", gdp: 12012 },
+            { name: "Burdur", region: "Mediterranean", gdp: 11950 },
+            { name: "Artvin", region: "BlackSea", gdp: 11884 },
+            { name: "Konya", region: "CentralAnatolia", gdp: 11845 },
+            { name: "Isparta", region: "Mediterranean", gdp: 11826 },
+            { name: "Aydın", region: "Aegean", gdp: 11798 },
+            { name: "Ardahan", region: "EasternAnatolia", gdp: 11731 },
+            { name: "Karabük", region: "BlackSea", gdp: 11265 },
+            { name: "Samsun", region: "BlackSea", gdp: 11253 },
+            { name: "Malatya", region: "EasternAnatolia", gdp: 11146 },
+            { name: "Nevşehir", region: "CentralAnatolia", gdp: 11126 },
+            { name: "Zonguldak", region: "BlackSea", gdp: 11114 },
+            { name: "Niğde", region: "CentralAnatolia", gdp: 11052 },
+            { name: "Rize", region: "BlackSea", gdp: 10837 },
+            { name: "Sivas", region: "CentralAnatolia", gdp: 10697 },
+            { name: "Adana", region: "Mediterranean", gdp: 10692 },
+            { name: "Elazığ", region: "EasternAnatolia", gdp: 10660 },
+            { name: "Kırşehir", region: "CentralAnatolia", gdp: 10572 },
+            { name: "Hatay", region: "Mediterranean", gdp: 10570 },
+            { name: "Amasya", region: "BlackSea", gdp: 10552 },
+            { name: "Trabzon", region: "BlackSea", gdp: 10539 },
+            { name: "Kahramanmaraş", region: "Mediterranean", gdp: 10430 },
+            { name: "Afyonkarahisar", region: "Aegean", gdp: 10243 },
+            { name: "Bayburt", region: "BlackSea", gdp: 10096 },
+            { name: "Çorum", region: "BlackSea", gdp: 10010 },
+            { name: "Adıyaman", region: "SoutheasternAnatolia", gdp: 9977 },
+            { name: "Erzurum", region: "EasternAnatolia", gdp: 9783 },
+            { name: "Sinop", region: "BlackSea", gdp: 9779 },
+            { name: "Bartın", region: "BlackSea", gdp: 9702 },
+            { name: "Gaziantep", region: "SoutheasternAnatolia", gdp: 9693 },
+            { name: "Osmaniye", region: "Mediterranean", gdp: 9631 },
+            { name: "Giresun", region: "BlackSea", gdp: 9377 },
+            { name: "Şırnak", region: "SoutheasternAnatolia", gdp: 9326 },
+            { name: "Hakkari", region: "EasternAnatolia", gdp: 9284 },
+            { name: "Yozgat", region: "CentralAnatolia", gdp: 9233 },
+            { name: "Kars", region: "EasternAnatolia", gdp: 9203 },
+            { name: "Ordu", region: "BlackSea", gdp: 8949 },
+            { name: "Gümüşhane", region: "BlackSea", gdp: 8757 },
+            { name: "Bingöl", region: "EasternAnatolia", gdp: 8429 },
+            { name: "Iğdır", region: "EasternAnatolia", gdp: 8063 },
+            { name: "Tokat", region: "BlackSea", gdp: 8058 },
+            { name: "Siirt", region: "SoutheasternAnatolia", gdp: 7975 },
+            { name: "Kilis", region: "SoutheasternAnatolia", gdp: 7724 },
+            { name: "Mardin", region: "SoutheasternAnatolia", gdp: 7537 },
+            { name: "Diyarbakır", region: "SoutheasternAnatolia", gdp: 7464 },
+            { name: "Batman", region: "SoutheasternAnatolia", gdp: 7202 },
+            { name: "Bitlis", region: "EasternAnatolia", gdp: 7063 },
+            { name: "Muş", region: "EasternAnatolia", gdp: 7016 },
+            { name: "Van", region: "EasternAnatolia", gdp: 6185 },
+            { name: "Ağrı", region: "EasternAnatolia", gdp: 5930 },
+            { name: "Şanlıurfa", region: "SoutheasternAnatolia", gdp: 5731 }
+        ];
+
+        // UI Selectors
+        const translateBtn = document.getElementById('translateBtn');
+        const translateDropdown = document.getElementById('translateDropdown');
+        const currentLangLabel = document.getElementById('currentLangLabel');
+        const searchBar = document.getElementById('searchBar');
+        const regionFilter = document.getElementById('regionFilter');
+        const sortOrder = document.getElementById('sortOrder');
+        const provinceGrid = document.getElementById('provinceGrid');
+        const emptyState = document.getElementById('emptyState');
+
+        // Dropdown Click Handle Logic
+        translateBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            translateDropdown.classList.toggle('hidden');
+        });
+
+        document.addEventListener('click', () => {
+            translateDropdown.classList.add('hidden');
+        });
+
+        // Language Engine Transition Routing
+        function changeLanguage(lang) {
+            currentLang = lang;
+            currentLangLabel.innerText = i18n[lang].label;
+            
+            // Step 1: Scan and translate static DOM elements containing data-i18n attributes
+            document.querySelectorAll('[data-i18n]').forEach(elem => {
+                const key = elem.getAttribute('data-i18n');
+                if (i18n[lang][key]) {
+                    elem.innerText = i18n[lang][key];
+                }
+            });
+
+            // Step 2: Dynamic input search input box placeholder transition 
+            searchBar.placeholder = i18n[lang].placeholder_search;
+
+            // Trigger complete dashboard component recalculation/repaint
+            renderDashboard();
+        }
+
+        // Processing & Rendering Core Logic
+        function renderDashboard() {
+            const searchQuery = searchBar.value.toLowerCase().trim();
+            const selectedRegion = regionFilter.value;
+            const chosenSort = sortOrder.value;
+
+            // Filter logic array step
+            let filtered = provincesData.filter(prov => {
+                const matchesSearch = prov.name.toLowerCase().includes(searchQuery);
+                const matchesRegion = (selectedRegion === 'All' || prov.region === selectedRegion);
+                return matchesSearch && matchesRegion;
+            });
+
+            // Sorting logic array step
+            if (chosenSort === 'desc') {
+                filtered.sort((a, b) => b.gdp - a.gdp);
+            } else if (chosenSort === 'asc') {
+                filtered.sort((a, b) => a.gdp - b.gdp);
+            } else if (chosenSort === 'alpha') {
+                filtered.sort((a, b) => a.name.localeCompare(b.name, 'tr'));
+            }
+
+            // Visual print execution step
+            provinceGrid.innerHTML = '';
+            if (filtered.length === 0) {
+                emptyState.classList.remove('hidden');
+                return;
+            } else {
+                emptyState.classList.add('hidden');
+            }
+
+            filtered.forEach(prov => {
+                const percentageOfAvg = ((prov.gdp / NATIONAL_AVG) * 100).toFixed(0);
+                const isAboveAverage = prov.gdp >= NATIONAL_AVG;
+                const barWidth = Math.min((prov.gdp / 25000) * 100, 100);
+                
+                // Fetch translation mapping for specific geographic regions
+                const dynamicRegionLabel = i18n[currentLang]['reg_' + prov.region] || prov.region;
+                const localOfAvgString = i18n[currentLang]['lbl_of_avg'];
+
+                const cardHTML = `
+                    <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-100 flex flex-col justify-between hover:shadow-md transition-all duration-200">
+                        <div>
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h3 class="font-bold text-gray-800 text-base">${prov.name}</h3>
+                                    <span class="inline-block bg-gray-100 text-gray-600 text-xs px-2 py-0.5 rounded-md mt-1 font-medium transition-all">${dynamicRegionLabel}</span>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-lg font-extrabold text-gray-900">$${prov.gdp.toLocaleString()}</span>
+                                    <p class="text-xs ${isAboveAverage ? 'text-emerald-600 font-semibold' : 'text-gray-400'}">${percentageOfAvg}% ${localOfAvgString}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <div class="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
+                                <div class="h-full rounded-full ${isAboveAverage ? 'bg-emerald-500' : 'bg-blue-500'}" style="width: ${barWidth}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                provinceGrid.insertAdjacentHTML('beforeend', cardHTML);
+            });
+        }
+
+        // Component UI listeners
+        searchBar.addEventListener('input', renderDashboard);
+        regionFilter.addEventListener('change', renderDashboard);
+        sortOrder.addEventListener('change', renderDashboard);
+
+        // Boot system initialize defaults
+        changeLanguage('en');
+    </script>
+</body>
+</html>
