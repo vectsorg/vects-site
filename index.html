@@ -6,14 +6,15 @@
     <title>Vects | Interactive Data & Statistics Portal</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-slate-900 text-slate-100 font-sans min-h-screen flex flex-col justify-between">
+<body class="bg-slate-900 text-slate-100 font-sans min-h-screen flex flex-col justify-between relative">
 
     <header class="border-b border-slate-800 bg-slate-900/50 backdrop-blur sticky top-0 z-50">
         <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
             <span class="text-2xl font-black text-sky-400 tracking-wider">vects<span class="text-white">.org</span></span>
-            <nav class="flex gap-6 text-sm font-medium text-slate-400">
-                <a href="#" class="text-sky-400">Home</a>
-                <a href="https://github.com" target="_blank" class="hover:text-white transition">Source Code</a>
+            <nav class="flex gap-6 items-center">
+                <button onclick="toggleModal(true)" class="inline-flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white px-3 py-1.5 rounded-lg border border-slate-700 text-xs font-semibold tracking-wide transition-colors">
+                    ℹ️ Information & Disclaimer
+                </button>
             </nav>
         </div>
     </header>
@@ -59,8 +60,43 @@
     </main>
 
     <footer class="border-t border-slate-800 py-6 text-center text-xs text-slate-500">
-        &copy; 2026 Vects. All analytical assets open-source.
+        &copy; 2026 Vects. All rights reserved.
     </footer>
 
+    <div id="disclaimerModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-6 shadow-2xl transform transition-all animate-in fade-in zoom-in-95 duration-200">
+            <div class="flex items-center gap-3 border-b border-slate-700 pb-3 mb-4">
+                <span class="text-2xl">⚠️</span>
+                <h3 class="text-lg font-bold text-white">General Data Disclaimer</h3>
+            </div>
+            <div class="space-y-3 text-slate-300 text-sm leading-relaxed">
+                <p>
+                    All metrics, economic indicators, geographic models, and statistical values displayed across this platform are <strong>estimates and approximations only</strong>.
+                </p>
+                <p>
+                    These figures do not reflect exact, real-time government tracking or absolute official audits. They are formulated purely for modeling and visual analysis purposes.
+                </p>
+                <p class="font-medium text-amber-400 bg-amber-500/10 p-3 rounded-lg border border-amber-500/20">
+                    The platform owner accepts zero legal liability or responsibility for any decisions made based on this data. Users are strictly prohibited from pursuing legal action or claims against the provider regarding data discrepancies.
+                </p>
+            </div>
+            <div class="mt-6 flex justify-end">
+                <button onclick="toggleModal(false)" class="bg-sky-500 hover:bg-sky-600 text-slate-950 font-bold px-5 py-2.5 rounded-xl text-sm transition">
+                    I Understand
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleModal(show) {
+            const modal = document.getElementById('disclaimerModal');
+            if (show) {
+                modal.classList.remove('hidden');
+            } else {
+                modal.classList.add('hidden');
+            }
+        }
+    </script>
 </body>
 </html>
