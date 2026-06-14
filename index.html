@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vects | Interactive Data & Statistics Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 text-slate-100 font-sans min-h-screen flex flex-col justify-between">
+
+    <header class="border-b border-slate-800 bg-slate-900/50 backdrop-blur sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+            <span class="text-2xl font-black text-sky-400 tracking-wider">vects<span class="text-white">.org</span></span>
+            <nav class="flex gap-6 text-sm font-medium text-slate-400">
+                <a href="#" class="text-sky-400">Home</a>
+                <a href="https://github.com" target="_blank" class="hover:text-white transition">Source Code</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 py-12 flex-1 w-full">
+        <div class="text-center max-w-2xl mx-auto mb-16">
+            <h2 class="text-4xl md:text-5xl font-extrabold tracking-tight text-white mb-4">
+                Interactive Data Explorers
+            </h2>
+            <p class="text-slate-400 text-lg">
+                Sleek, responsive data models and interactive mapping visualizations built for deep regional insights.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            
+            <div class="bg-slate-800 border border-slate-700/50 rounded-2xl p-6 hover:border-sky-500/50 transition-all group flex flex-col justify-between">
+                <div>
+                    <div class="text-sky-400 text-xs font-bold uppercase tracking-widest mb-2">Economy & GDP</div>
+                    <h3 class="text-xl font-bold text-white group-hover:text-sky-400 transition mb-2">Turkey Provincial GDP Explorer</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed mb-6">
+                        Interactive economic tracking across all 81 provinces relative to the national baseline with multi-language support.
+                    </p>
+                </div>
+                <a href="/stats/turkiyegdppercapita" class="w-full bg-slate-700 hover:bg-sky-500 hover:text-slate-950 font-bold text-center py-3 rounded-xl transition text-sm">
+                    Open Project ➔
+                </a>
+            </div>
+
+            <div class="bg-slate-800/40 border border-slate-800 border-dashed rounded-2xl p-6 flex flex-col justify-center items-center text-center opacity-60">
+                <span class="text-2xl mb-2">📈</span>
+                <h3 class="font-semibold text-slate-400">Turkey Height Average Map</h3>
+                <p class="text-slate-500 text-xs mt-1">Coming Soon</p>
+            </div>
+
+            <div class="bg-slate-800/40 border border-slate-800 border-dashed rounded-2xl p-6 flex flex-col justify-center items-center text-center opacity-60">
+                <span class="text-2xl mb-2">🗺️</span>
+                <h3 class="font-semibold text-slate-400">Demographic Population Explorer</h3>
+                <p class="text-slate-500 text-xs mt-1">Coming Soon</p>
+            </div>
+
+        </div>
+    </main>
+
+    <footer class="border-t border-slate-800 py-6 text-center text-xs text-slate-500">
+        &copy; 2026 Vects. All analytical assets open-source.
+    </footer>
+
+</body>
+</html>
